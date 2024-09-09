@@ -83,7 +83,7 @@ def get_stats():
 
 
 def save_link(user_id, link):
-    cursor.execute('REPLACE INTO links (user_id, link) VALUES (?, ?)', (user_id, link))
+    cursor.execute('INSERT OR IGNORE INTO links (user_id, link) VALUES (?, ?)', (user_id, link))
     conn.commit()
     initialize_stats()
 
@@ -122,13 +122,16 @@ def handle_unique_link(message):
 def start(message):
     user_id = message.chat.id
     cancel(message)
-    unique_link = str(uuid.uuid4())
-    save_link(user_id, unique_link)
-    messages[user_id] = None
-    cursor.execute('INSERT OR IGNORE INTO subscriptions (user_id) VALUES (?)', (user_id,))
-    conn.commit()
-    bot.send_message(user_id, f'Ваша уникальная ссылка: https://t.me/messeanoni_bot?start={unique_link}')
-    bot.send_message(user_id, '/delete чтобы удалить свою ссылку.')
+    if get_link(user_id) is None:
+        unique_link = str(uuid.uuid4())
+        save_link(user_id, unique_link)
+        messages[user_id] = None
+        cursor.execute('INSERT OR IGNORE INTO subscriptions (user_id) VALUES (?)', (user_id,))
+        conn.commit()
+        bot.send_message(user_id, f'Ваша уникальная ссылка: https://t.me/messeanoni_bot?start={unique_link}')
+        bot.send_message(user_id, '/delete чтобы удалить свою ссылку.')
+    else
+        bot.send_message(user_id, '<b>Ошибка:</b> У вас уже есть ссылка. /delete чтобы удалить свою ссылку.')
 
 @bot.message_handler(commands=['cancel'])
 def cancel(message):
@@ -284,7 +287,7 @@ def send_message(user_id, content_type, file_id=None, caption=None):
             elif content_type == 'animation':
                 bot.send_animation(recipient_id, file_id, caption=caption)
     else:
-        bot.send_message(user_id, 'Введите команду /start для создания новой ссылки.')
+        bot.send_message(user_id, 'Вы никому не отправляете сообщение.')
 
 
 
