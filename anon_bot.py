@@ -130,8 +130,8 @@ def start(message):
         conn.commit()
         bot.send_message(user_id, f'Ваша уникальная ссылка: https://t.me/messeanoni_bot?start={unique_link}')
         bot.send_message(user_id, '/delete чтобы удалить свою ссылку.')
-    else
-        bot.send_message(user_id, '<b>Ошибка:</b> У вас уже есть ссылка. /delete чтобы удалить свою ссылку.')
+    else:
+        bot.send_message(user_id, '<b>Ошибка:</b> У вас уже есть ссылка. /delete чтобы удалить свою ссылку.', parse_mode='HTML')
 
 @bot.message_handler(commands=['cancel'])
 def cancel(message):
